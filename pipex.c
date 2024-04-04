@@ -1,46 +1,25 @@
 #include "pipex.h"
 
-char *check_for_command(char **dirs, char *command1)
+int *init_fd()
 {
-	char *command;
-	int i;
-
-	i = 0;
-	while (dirs[i])
-	{
-		command = ft_strjoin(dirs[i], command1);
-		if (access(command, X_OK) != -1)
-			return (command);
-		free(command);
-		i++;
-	}
-	if (!dirs[i])
-	{
-		free_list(dirs);
-		error_exit();
-	}
-	return (0);
-}
-
-int main(int argc, char *argv[], char **envp)
-{
-	char **dirs;
-	char *cmd1;
-	char *cmd2;
-	int i;
 	int *fd;
-
-	if (argc != 5 || access(argv[1], F_OK) == -1 || access(argv[4], F_OK) == -1)
-		error_exit();
 
 	fd = malloc(sizeof(int) * 2);
 	if (!fd)
-		error_exit();
+		return (0);
 	if (pipe(fd) == -1)
 	{
 		free(fd);
-		error_exit();
+		return (0);
 	}
+	return (fd);
+}
+
+char **init_dirs(char **envp)
+{
+	int i;
+	char **dirs;
+
 	i = 0;
 	while (envp[i])
 	{
@@ -49,45 +28,79 @@ int main(int argc, char *argv[], char **envp)
 		i++;
 	}
 	dirs = ft_split(envp[i] + 5, ':');
-	char **command1 = ft_split(argv[2], ' ');
-	char **command2 = ft_split(argv[3], ' ');
-	cmd1 = check_for_command(dirs, command1[0]);
-	if (!cmd1)
+	return (dirs);
+}
+
+char **check_for_command(char *cmd_from_terminal, char **dirs)
+{
+	char **command;
+	int i;
+	char *cmd;
+
+	command = ft_split(cmd_from_terminal, ' ');
+	i = 0;
+	while (dirs[i])
 	{
-		free_list(command1);
-		free_list(dirs);
-		error_exit();
+		cmd = ft_strjoin(dirs[i], command[0]);
+		if (access(cmd, X_OK) != -1)
+		{
+			free(command[0]);
+			command[0] = cmd;
+			break ;
+		}
+		free(cmd);
+		i++;
 	}
-	cmd2 = check_for_command(dirs, command2[0]);
-	free_list(dirs);
-	if (!cmd2)
+	if (!dirs[i])
+		return (0);
+	return (command);
+}
+
+
+int main(int argc, char *argv[], char **envp)
+{
+	char **dirs;
+	char **cmd;
+	int *fd;
+
+	if (argc != 5 || access(argv[1], F_OK) == -1)
+		return (0);
+	dirs = init_dirs(envp);
+	fd = init_fd();
+	if (!fd)
+		return (0);
+	int pid1 = fork();
+	if (pid1 == 0)
 	{
-		free_list(command1);
-		free_list(command2);
-		free(cmd1);
-		error_exit();
-	}
-	int pid = fork();
-	if (pid == 0)
-	{
+		cmd = check_for_command(argv[2], dirs);
+		if (!cmd)
+		{
+			//free_list(dirs);
+			return (0);
+		}
 		close(fd[0]);
 		dup2(open(argv[1], O_RDONLY), 0);
 		dup2(fd[1], 1);
-		char *argv2[] = {0};
 		close(fd[1]);
-		execve(cmd1, command1, argv2);
+		execve(cmd[0], cmd, envp);
 	}
 	else 
 	{
 		close(fd[1]);
-		wait(NULL);
-		int pid1 = fork();
-		if (pid1 == 0)
+		int pid2 = fork();
+		if (pid2 == 0)
 		{
+			cmd = check_for_command(argv[4], dirs);
+			if (!cmd)
+			{
+				//free_list(dirs);
+				return (0);
+			}
 			dup2(fd[0], 0);
-			dup2(open(argv[4], O_WRONLY), 1);
-			char *argv2[] = {0};
-			execve(cmd2, command2, argv2);
+			dup2(open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777), 1);
+			execve(cmd[0], cmd, envp);
 		}
-	}	
+		wait(NULL);
+	}
+	system("leaks pipex");
 }

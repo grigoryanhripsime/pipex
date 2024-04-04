@@ -2,7 +2,7 @@
 
 void error_exit(void)
 {
-	write(2, "Error\n", 6);
+	//write(2, "Error\n", 6);
 	//system("leaks push_swap");
 	exit(1);
 }
