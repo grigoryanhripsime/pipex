@@ -2,9 +2,15 @@
 
 void error_exit(void)
 {
-	//write(2, "Error\n", 6);
-	//system("leaks push_swap");
+	//system("leaks pipex");
 	exit(1);
+}
+
+void error_free_exit(int *fd, char **cmd)
+{
+		free(fd);
+		free_list(cmd);
+		exit(1);
 }
 
 void free_list(char **arr)
@@ -18,5 +24,20 @@ void free_list(char **arr)
 		i++;
 	}
 	free(arr);
+}
+void command_not_found(char **command, char **dirs)
+{
+	free_list(command);
+	free_list(dirs);
+	write(2, "command not found\n", 18);
+	error_exit();
+}
+
+void permission_denied(int *fd)
+{
+	(void)fd;
+	//free(fd);
+	write(2, "Permission denied\n", 18);
+
 }
 

@@ -13,5 +13,8 @@ char	**ft_split(char const *s, char c);
 char	*ft_strjoin(char const *s1, char const *s2);
 void free_list(char **arr);
 void error_exit(void);
+void command_not_found(char **command, char **dirs);
+void error_free_exit(int *fd, char **cmd);
+void permission_denied(int *fd);
 
 #endif
