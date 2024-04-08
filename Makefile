@@ -2,7 +2,7 @@ CC = cc
 
 CFLAGS = -Wall -Wextra -Werror -I$(INCS) #-g3 -fsanitize=address
 
-SRCS = pipex.c ft_strstr.c ft_split.c ft_strjoin.c error.c
+SRCS = pipex.c ft_strstr.c ft_split.c ft_strjoin.c error.c initializing.c commands.c
 
 INCS = ./
 

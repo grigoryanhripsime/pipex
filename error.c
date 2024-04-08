@@ -1,43 +1,48 @@
 #include "pipex.h"
 
+void print_str(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i])
+	{
+		write(2, str + i, 1);
+		i++;
+	}
+}
+
 void error_exit(void)
 {
 	//system("leaks pipex");
 	exit(1);
 }
 
-void error_free_exit(int *fd, char **cmd)
-{
-		free(fd);
-		free_list(cmd);
-		exit(1);
-}
-
-void free_list(char **arr)
+void free_struct(t_cmd *cmd)
 {
 	int i;
 
+	free(cmd -> fd);
 	i = 0;
-	while (arr[i])
+	while (cmd -> dirs[i])
 	{
-		free(arr[i]);
+		free(cmd -> dirs[i]);
 		i++;
 	}
-	free(arr);
+	free(cmd -> dirs);
 }
-void command_not_found(char **command, char **dirs)
+void command_not_found(t_cmd *cmd)
 {
-	free_list(command);
-	free_list(dirs);
-	write(2, "command not found\n", 18);
-	error_exit();
+	print_str(cmd -> argv[cmd -> cmd_index]);
+	print_str(": command not found\n");
+	cmd -> valid = 0; 
+
 }
 
-void permission_denied(int *fd)
+void permission_denied(t_cmd *cmd)
 {
-	(void)fd;
-	//free(fd);
-	write(2, "Permission denied\n", 18);
-
+	print_str(cmd -> argv[1]);
+	print_str(": Permission denied\n");
+	cmd -> valid = 0; 
 }
 
