@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_strjoin.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/09 15:35:01 by hrigrigo          #+#    #+#             */
+/*   Updated: 2024/04/09 18:51:25 by hrigrigo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex.h"
 
 char	*ft_strjoin(char const *s1, char const *s2)
@@ -7,8 +19,6 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	char	*s3;
 	int		i;
 
-	if (!s1 || !s2)
-		return (0);
 	i = 0;
 	s1_size = ft_strlen(s1);
 	s2_size = ft_strlen(s2);

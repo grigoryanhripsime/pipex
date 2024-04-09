@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   error.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/09 15:33:47 by hrigrigo          #+#    #+#             */
+/*   Updated: 2024/04/09 18:52:41 by hrigrigo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex.h"
 
-void print_str(char *str)
+void	print_str(char *str)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (str[i])
@@ -12,15 +24,15 @@ void print_str(char *str)
 	}
 }
 
-void error_exit(void)
+void	error_exit(void)
 {
-	//system("leaks pipex");
+	system("leaks pipex");
 	exit(1);
 }
 
-void free_struct(t_cmd *cmd)
+void	free_struct(t_cmd *cmd)
 {
-	int i;
+	int	i;
 
 	free(cmd -> fd);
 	i = 0;
@@ -31,18 +43,21 @@ void free_struct(t_cmd *cmd)
 	}
 	free(cmd -> dirs);
 }
-void command_not_found(t_cmd *cmd)
+
+void	command_not_found(t_cmd *cmd)
 {
 	print_str(cmd -> argv[cmd -> cmd_index]);
 	print_str(": command not found\n");
-	cmd -> valid = 0; 
-
+	close_fd(cmd);
+	free(cmd);
+	error_exit();
 }
 
-void permission_denied(t_cmd *cmd)
+void	permission_denied(t_cmd *cmd)
 {
 	print_str(cmd -> argv[1]);
 	print_str(": Permission denied\n");
-	cmd -> valid = 0; 
+	close_fd(cmd);
+	free(cmd);
+	error_exit();
 }
-
