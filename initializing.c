@@ -6,7 +6,7 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 18:42:25 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/09 18:50:41 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/12 17:25:30 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,33 +18,48 @@ void	init_fd(t_cmd *cmd)
 	int	i;
 
 	i = 0;
-	fd = malloc(sizeof(int [2]) * (cmd -> argc - 3));
+	fd = malloc(sizeof(int [2]) * (cmd -> argc - 4));
 	if (!fd)
-		return ;
-	while (i < cmd -> argc - 2)
+	{
+		free(cmd);
+		exit(1);
+	}
+	while (i < cmd -> argc - 3)
 	{
 		if (pipe(fd[i]) == -1)
 		{
+			while (i > 0)
+			{
+				close(fd[i][0]);
+				close(fd[i--][1]);
+			}
 			free(fd);
-			error_exit();
+			exit(1);
 		}
 		i++;
 	}
 	cmd -> fd = fd;
 }
 
-char	**init_dirs(char **envp)
+void	init_dirs(t_cmd *cmd)
 {
 	int		i;
 	char	**dirs;
 
 	i = 0;
-	while (envp[i])
+	while (cmd -> envp[i])
 	{
-		if (ft_strstr(envp[i], "PATH="))
+		if (ft_strstr(cmd -> envp[i], "PATH="))
 			break ;
 		i++;
 	}
-	dirs = ft_split(envp[i] + 5, ':');
-	return (dirs);
+	dirs = ft_split(cmd -> envp[i] + 5, ':');
+	if (!dirs)
+	{
+		close_fd(cmd);
+		free(cmd);
+		print_error("There are no directories found.\n");
+		exit(1);
+	}
+	cmd -> dirs = dirs;
 }

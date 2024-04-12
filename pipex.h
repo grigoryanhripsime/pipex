@@ -6,7 +6,7 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 15:33:20 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/09 18:46:11 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/12 17:25:49 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,13 @@ char	**ft_split(char const *s, char c);
 char	*ft_strjoin(char const *s1, char const *s2);
 
 void	free_struct(t_cmd *cmd);
-void	error_exit(void);
-void	command_not_found(t_cmd *cmd);
-void	permission_denied(t_cmd *cmd);
-void	print_str(char *str);
+void	command_not_found(t_cmd *cmd, char **command);
+void	print_error(char *str);
 
 void	init_fd(t_cmd *cmd);
-char	**init_dirs(char **envp);
+void	init_dirs(t_cmd *cmd);
 
+void	error_free_exit(char *name, char *error, t_cmd *cmd);
 char	**check_for_command(t_cmd *cmd);
 void	first_command(t_cmd *cmd);
 void	middle_command(t_cmd *cmd);

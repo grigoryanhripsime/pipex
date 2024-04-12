@@ -6,7 +6,7 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 18:53:04 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/09 18:56:37 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/12 17:22:41 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,35 +35,47 @@ char	**check_for_command(t_cmd *cmd)
 		i++;
 	}
 	if (!cmd -> dirs[i])
-		command_not_found(cmd);
+		command_not_found(cmd, command);
 	return (command);
+}
+
+void	doing_dups(int infile, int outfile, t_cmd *cmd)
+{
+	if (dup2(infile, 0) == -1 || dup2(outfile, 1) == -1)
+	{
+		print_error("Dup failed\n");
+		close_fd(cmd);
+		if (cmd -> cmd_index == 2)
+			close(infile);
+		else if (cmd -> cmd_index == cmd -> argc - 2)
+			close(outfile);
+		error_free_exit(0, 0, cmd);
+	}
+	close_fd(cmd);
 }
 
 void	first_command(t_cmd *cmd)
 {
 	char	**command;
 	int		infile_fd;
+	int		i;
 
 	infile_fd = open(cmd -> argv[1], O_RDONLY);
 	if (access(cmd -> argv[1], F_OK) == -1)
-	{
-		print_str(cmd -> argv[1]);
-		print_str(": No such file or directory\n");
-		free_struct(cmd);
-		error_exit();
-	}
+		error_free_exit(cmd -> argv[1], ": No such file or directory\n", cmd);
 	else if (infile_fd < 0)
-		permission_denied(cmd);
-	command = check_for_command(cmd);
-	if (dup2(infile_fd, 0) == -1 || dup2(cmd -> fd[0][1], 1) == -1)
-	{
-		free(command);
-		return ;
-	}
-	close_fd(cmd);
+		error_free_exit(cmd -> argv[1], ": Permition denied\n", cmd);
+	doing_dups(infile_fd, cmd -> fd[0][1], cmd);
 	close(infile_fd);
-	//system("leaks pipex");
-	execve(command[0], command, cmd -> envp);
+	command = check_for_command(cmd);
+	if (execve(command[0], command, cmd -> envp) == -1)
+	{
+		i = 0;
+		while (command[i])
+			free(command[i++]);
+		free(command);
+		error_free_exit(0, "Executing command failed\n", cmd);
+	}
 }
 
 void	middle_command(t_cmd *cmd)
@@ -72,16 +84,16 @@ void	middle_command(t_cmd *cmd)
 	int		i;
 
 	i = cmd -> cmd_index;
+	doing_dups(cmd -> fd[i - 3][0], cmd -> fd[i - 2][1], cmd);
 	command = check_for_command(cmd);
-	if (dup2(cmd -> fd[i - 2][1], 1) == -1 ||
-		dup2(cmd -> fd[i - 3][0], 0) == -1)
+	if (execve(command[0], command, cmd -> envp) == -1)
 	{
+		i = 0;
+		while (command[i])
+			free(command[i++]);
 		free(command);
-		return ;
+		error_free_exit(0, "Executing command failed\n", cmd);
 	}
-	close_fd(cmd);
-	//system("leaks pipex");
-	execve(command[0], command, cmd -> envp);
 }
 
 void	last_command(t_cmd *cmd)
@@ -94,31 +106,17 @@ void	last_command(t_cmd *cmd)
 	outfile_fd = open(cmd -> argv[cmd -> argc - 1],
 			O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (outfile_fd < 0)
-	{
-		free_struct(cmd);
-		error_exit();
-	}
-	command = check_for_command(cmd);
-	if (dup2(outfile_fd, 1) == -1 || dup2(cmd -> fd[i - 3][0], 0) == -1)
-	{
-		free(command);
-		return ;
-	}
-	close_fd(cmd);
+		error_free_exit(0, "Coudn't open the file\n", cmd);
+	doing_dups(cmd -> fd[i - 3][0], outfile_fd, cmd);
 	close(outfile_fd);
-	//system("leaks pipex");
-	execve(command[0], command, cmd -> envp);
-}
-
-void	close_fd(t_cmd *cmd)
-{
-	int	i;
-
-	i = 0;
-	while (i < cmd -> argc - 2)
+	close_fd(cmd);
+	command = check_for_command(cmd);
+	if (execve(command[0], command, cmd -> envp) == -1)
 	{
-		close(cmd -> fd[i][1]);
-		close(cmd -> fd[i][0]);
-		i++;
+		i = 0;
+		while (command[i])
+			free(command[i++]);
+		free(command);
+		error_free_exit(0, "Executing command failed\n", cmd);
 	}
 }

@@ -6,16 +6,18 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 15:33:47 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/09 18:52:41 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/12 17:25:30 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	print_str(char *str)
+void	print_error(char *str)
 {
 	int	i;
 
+	if (!str)
+		return ;
 	i = 0;
 	while (str[i])
 	{
@@ -24,10 +26,17 @@ void	print_str(char *str)
 	}
 }
 
-void	error_exit(void)
+void	close_fd(t_cmd *cmd)
 {
-	system("leaks pipex");
-	exit(1);
+	int	i;
+
+	i = 0;
+	while (i < cmd -> argc - 4)
+	{
+		close(cmd -> fd[i][1]);
+		close(cmd -> fd[i][0]);
+		i++;
+	}
 }
 
 void	free_struct(t_cmd *cmd)
@@ -42,22 +51,32 @@ void	free_struct(t_cmd *cmd)
 		i++;
 	}
 	free(cmd -> dirs);
+	free(cmd);
 }
 
-void	command_not_found(t_cmd *cmd)
+void	command_not_found(t_cmd *cmd, char **command)
 {
-	print_str(cmd -> argv[cmd -> cmd_index]);
-	print_str(": command not found\n");
+	int	i;
+
+	print_error(command[0]);
+	print_error(": command not found\n");
 	close_fd(cmd);
-	free(cmd);
-	error_exit();
+	free_struct(cmd);
+	i = 0;
+	while (command[i])
+	{
+		free(command[i]);
+		i++;
+	}
+	free(command);
+	exit(1);
 }
 
-void	permission_denied(t_cmd *cmd)
+void	error_free_exit(char *name, char *error, t_cmd *cmd)
 {
-	print_str(cmd -> argv[1]);
-	print_str(": Permission denied\n");
+	print_error(name);
+	print_error(error);
 	close_fd(cmd);
-	free(cmd);
-	error_exit();
+	free_struct(cmd);
+	exit(1);
 }
