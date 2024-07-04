@@ -6,7 +6,7 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 15:33:34 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/12 17:25:30 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/18 17:10:26 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,14 @@ int	main(int argc, char *argv[], char **envp)
 	cmd -> argc = argc;
 	cmd -> argv = argv;
 	cmd -> envp = envp;
+	if (!ft_strncmp(argv[1], "here_doc", 8))
+		cmd -> here_doc = 1;
+	else
+		cmd -> here_doc = 0;
 	init_fd(cmd);
 	init_dirs(cmd);
 	cmd -> cmd_index = 2;
 	running_processes(cmd);
 	free_struct(cmd);
-	//system("leaks pipex");
 	return (0);
 }

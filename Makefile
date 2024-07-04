@@ -1,8 +1,8 @@
 CC = cc
 
-CFLAGS = -Wall -Wextra -Werror -I$(INCS) #-g3 -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -I$(INCS) -g3 -fsanitize=address
 
-SRCS = pipex.c ft_strstr.c ft_split.c ft_strjoin.c error.c initializing.c commands.c
+SRCS = pipex.c ft_split.c error.c initializing.c commands.c pipex_utils.c here_doc.c get_next_line.c get_next_line_utils.c
 
 INCS = ./
 

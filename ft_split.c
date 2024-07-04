@@ -6,13 +6,13 @@
 /*   By: hrigrigo <hrigrigo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 15:34:55 by hrigrigo          #+#    #+#             */
-/*   Updated: 2024/04/09 15:34:56 by hrigrigo         ###   ########.fr       */
+/*   Updated: 2024/04/12 18:19:27 by hrigrigo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-size_t	ft_strlen(const char *s)
+size_t	ft_strlen_split(const char *s)
 {
 	size_t	i;
 
